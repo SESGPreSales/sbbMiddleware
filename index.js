@@ -25,7 +25,7 @@ const body = `
                     </LocationRef>
                 </Location>
                 <Params>
-                    <NumberOfResults>100</NumberOfResults>
+                    <NumberOfResults>500</NumberOfResults>
                     <StopEventType>departure</StopEventType>
                     <IncludePreviousCalls>false</IncludePreviousCalls>
                     <IncludeOnwardCalls>false</IncludeOnwardCalls>
@@ -69,8 +69,6 @@ function myFunction(xml) {
     var x, i;
     x = xml;
 
-    // console.log(xml);
-
     for (i = 0; i < x.length; i++) {
 
         let track = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].PlannedBay[0].Text[0];
@@ -83,9 +81,7 @@ function myFunction(xml) {
 
         txt.push({ timePlanned, track, train, dir, dest, from })
     }
-
-    //console.log('DataFile (txt)= ', txt);
-
+    // Write the newly created JSON to file
     fs.writeFile(fileName, JSON.stringify(txt), function writeJSON(err) {
         if (err) return console.log(err);
         //console.log('writing to ' + fileName);
@@ -93,27 +89,44 @@ function myFunction(xml) {
 };
 
 
-// crete Route to request correct data
+// crete Route to request track (as single or comma separated list of tracks)
 app.get('/api/sbb/track/:track', (req, res) => {
-    console.log('requested track =', req.params.track);
+    let reqTrack = [];
+    reqTrack = req.params.track.split(',');
+
+
+    console.log('requested track =', reqTrack, reqTrack.length);
+    //get fulldata from file:
+    let contentfull = JSON.parse(fs.readFileSync(fileName))
+
+    //filter the data
+    let filtered = contentfull.filter(train => reqTrack.includes(train.track))
+
+    console.log('filtered ', filtered.length);
+    // console.log('filtered ', filtered);
+    //return to screen
+    res.status(200).send(filtered);
+
+});
+
+// crete Route to arriving trains (can be Departure or Arrival, or both commaseparated)
+app.get('/api/sbb/direction/:dir', (req, res) => {
+    let reqDirection = [];
+    reqDirection = req.params.dir.split(',');
+
+    console.log('requested direction =', reqDirection, reqDirection.length);
 
     //get fulldata from file:
     let contentfull = JSON.parse(fs.readFileSync(fileName))
 
-    let filtered = contentfull.filter(t => t.track === req.params.track);
-    //console.log('filtered ', filtered);
+    //filter the data
+    let filtered = contentfull.filter(train => reqDirection.includes(train.dir))
 
+    console.log('filtered ', filtered.length);
+
+    //return to screen
     res.status(200).send(filtered);
 
-    // id = req.params.id;
-    // contentfull[id].occupied = req.params.movement;
-    // console.log('new: ', contentfull);
-
-    // fs.writeFile(fileName, JSON.stringify(contentfull), function writeJSON(err) {
-    // 	if (err) return console.log(err);
-    // 	//  	console.log(JSON.stringify(contentfull));
-    // 	console.log('writing to ' + fileName);
-    // })
 });
 
 setInterval(() => getData(), 30000);
