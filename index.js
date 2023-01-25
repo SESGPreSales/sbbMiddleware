@@ -69,17 +69,28 @@ function myFunction(xml) {
     var x, i;
     x = xml;
 
+    let timePlanned;
+    let timeEstimated;
+
     for (i = 0; i < x.length; i++) {
 
         let track = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].PlannedBay[0].Text[0];
         let train = x[i].StopEvent[0].Service[0].PublishedLineName[0].Text[0];
         let dir = 'Departure';
-        let timePlanned = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].ServiceDeparture[0].TimetabledTime[0];
-        //let timeEstimated = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].ServiceDeparture[0].EstimatedTime[0];
+        timePlanned = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].ServiceDeparture[0].TimetabledTime[0];
+
+        if (x[i].StopEvent[0].ThisCall[0].CallAtStop[0].ServiceDeparture[0].EstimatedTime) { timeEstimated = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].ServiceDeparture[0].EstimatedTime }
+        else { timeEstimated = timePlanned };
+
         let dest = x[i].StopEvent[0].Service[0].DestinationText[0].Text[0];
         let from = x[i].StopEvent[0].Service[0].OriginText[0].Text[0];
 
-        txt.push({ timePlanned, track, train, dir, dest, from })
+        let t1 = new Date(timePlanned).addHours(1);
+        let t2 = new Date(timeEstimated).addHours(1);
+
+        let diff = diff_minutes(t2, t1);
+
+        txt.push({ t1, t2, diff, track, train, dir, dest, from })
     }
     // Write the newly created JSON to file
     fs.writeFile(fileName, JSON.stringify(txt), function writeJSON(err) {
@@ -88,22 +99,33 @@ function myFunction(xml) {
     });
 };
 
+Date.prototype.addHours = function (h) {
+    this.setHours(this.getHours() + h);
+    return this;
+}
+
+//Get the min difference between two date
+function diff_minutes(dt2, dt1) {
+    var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+    diff /= 60;
+    return Math.abs(Math.round(diff));
+}
+
 
 // crete Route to request track (as single or comma separated list of tracks)
 app.get('/api/sbb/track/:track', (req, res) => {
     let reqTrack = [];
     reqTrack = req.params.track.split(',');
 
-
-    console.log('requested track =', reqTrack, reqTrack.length);
+    // console.log('requested track =', reqTrack, reqTrack.length);
     //get fulldata from file:
     let contentfull = JSON.parse(fs.readFileSync(fileName))
 
     //filter the data
     let filtered = contentfull.filter(train => reqTrack.includes(train.track))
 
-    console.log('filtered ', filtered.length);
-    // console.log('filtered ', filtered);
+    // console.log('filtered ', filtered.length);
+
     //return to screen
     res.status(200).send(filtered);
 
@@ -114,15 +136,14 @@ app.get('/api/sbb/direction/:dir', (req, res) => {
     let reqDirection = [];
     reqDirection = req.params.dir.split(',');
 
-    console.log('requested direction =', reqDirection, reqDirection.length);
-
+    //console.log('requested direction =', reqDirection, reqDirection.length);
     //get fulldata from file:
     let contentfull = JSON.parse(fs.readFileSync(fileName))
 
     //filter the data
     let filtered = contentfull.filter(train => reqDirection.includes(train.dir))
 
-    console.log('filtered ', filtered.length);
+    //console.log('filtered ', filtered.length);
 
     //return to screen
     res.status(200).send(filtered);
