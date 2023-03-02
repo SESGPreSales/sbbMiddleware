@@ -25,7 +25,7 @@ const body = `
                     </LocationRef>
                 </Location>
                 <Params>
-                    <NumberOfResults>500</NumberOfResults>
+                    <NumberOfResults>300</NumberOfResults>
                     <StopEventType>departure</StopEventType>
                     <IncludePreviousCalls>false</IncludePreviousCalls>
                     <IncludeOnwardCalls>false</IncludeOnwardCalls>
@@ -57,6 +57,7 @@ function getData() {
 
                     let jsonObj = result.Trias.ServiceDelivery[0].DeliveryPayload[0].StopEventResponse[0].StopEventResult;
                     //console.log(jsonObj[0].StopEvent[0].ThisCall[0].CallAtStop[0].PlannedBay[0].Text[0]);
+                    //console.log('Updated Data from SBB Api received');
                     myFunction(jsonObj)
 
                 });
@@ -71,12 +72,15 @@ function myFunction(xml) {
 
     let timePlanned;
     let timeEstimated;
+    let track;
 
     for (i = 0; i < x.length; i++) {
 
-        let track = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].PlannedBay[0].Text[0];
+        if (x[i].StopEvent[0].ThisCall[0].CallAtStop[0].PlannedBay) { track = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].PlannedBay[0].Text[0] }
+        else { track = 'tbd' };
+
         let train = x[i].StopEvent[0].Service[0].PublishedLineName[0].Text[0];
-        let dir = 'Departure';
+        let dir = 'Departures';
         timePlanned = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].ServiceDeparture[0].TimetabledTime[0];
 
         if (x[i].StopEvent[0].ThisCall[0].CallAtStop[0].ServiceDeparture[0].EstimatedTime) { timeEstimated = x[i].StopEvent[0].ThisCall[0].CallAtStop[0].ServiceDeparture[0].EstimatedTime }
@@ -85,8 +89,8 @@ function myFunction(xml) {
         let dest = x[i].StopEvent[0].Service[0].DestinationText[0].Text[0];
         let from = x[i].StopEvent[0].Service[0].OriginText[0].Text[0];
 
-        let t1 = new Date(timePlanned).addHours(1);
-        let t2 = new Date(timeEstimated).addHours(1);
+        let t1 = new Date(timePlanned);
+        let t2 = new Date(timeEstimated);
 
         let diff = diff_minutes(t2, t1);
 
@@ -95,7 +99,7 @@ function myFunction(xml) {
     // Write the newly created JSON to file
     fs.writeFile(fileName, JSON.stringify(txt), function writeJSON(err) {
         if (err) return console.log(err);
-        //console.log('writing to ' + fileName);
+        console.log('writing to ' + fileName);
     });
 };
 
@@ -111,31 +115,50 @@ function diff_minutes(dt2, dt1) {
     return Math.abs(Math.round(diff));
 }
 
-
+//let contentfull = {};
+let counter = 0;
 // crete Route to request track (as single or comma separated list of tracks)
 app.get('/api/sbb/track/:track', (req, res) => {
     let reqTrack = [];
+    // let filtered = [];
+    // reqTrack = '165'
     reqTrack = req.params.track.split(',');
 
-    // console.log('requested track =', reqTrack, reqTrack.length);
+    //console.log('requested track =', reqTrack, reqTrack.length);
     //get fulldata from file:
-    let contentfull = JSON.parse(fs.readFileSync(fileName))
+    let contentfull = [];
+    contentfull = JSON.parse(fs.readFileSync(fileName))
 
     //filter the data
-    let filtered = contentfull.filter(train => reqTrack.includes(train.track))
+    let filtered = contentfull.filter(train => reqTrack.includes(train.track));
 
-    // console.log('filtered ', filtered.length);
+    if (filtered.length > 0) {
+        // console.log('filtered is not empty', filtered.length);
+        const toShow = `results: ${filtered.length} - next dest: ${filtered[0].dest} , Time: ${filtered[0].t1}`
+        //console.log('filtered ', toShow);
+        res.status(200).send(filtered);
+    }
+    else {
+        //return to screen
+        let noData = [{
+            dest: 'No Data to show',
+            train: '',
+            t1: '',
+            diff: ''
+        }];
+        console.log('filtered was empty', noData);
 
-    //return to screen
-    res.status(200).send(filtered);
-
+        res.status(200).send(noData);
+    }
+    // counter++;
+    // console.log('counter', counter)
 });
+
 
 // crete Route to arriving trains (can be Departure or Arrival, or both commaseparated)
 app.get('/api/sbb/direction/:dir', (req, res) => {
     let reqDirection = [];
     reqDirection = req.params.dir.split(',');
-
     //console.log('requested direction =', reqDirection, reqDirection.length);
     //get fulldata from file:
     let contentfull = JSON.parse(fs.readFileSync(fileName))
