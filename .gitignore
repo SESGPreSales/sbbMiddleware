@@ -1,4 +1,5 @@
 /node_modules/
 /environment/
 /public/
-public/trains.json
+/public/trains.json
+package-lock.json
