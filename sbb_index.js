@@ -4,10 +4,8 @@ const app = express();
 var parseString = require('xml2js').parseString;
 const fs = require('fs');
 const { sbbApiKey } = require('./environment/secrets');
-//require('./environment/secrets')
 
 const fileName = './public/trains.json';
-//const fileNamePower = './public/power.json';
 
 let txt = [];
 
