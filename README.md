@@ -11,6 +11,11 @@ Using this data, the Middleware offers an API that can fulfill WPlayer requests 
 
 ### API Key 
 
+To utilize this middleware, you must obtain an API key from https://opentransportdata.swiss/de/dev-dashboard/  
+Once you have the API key, create a folder named "environment" and add a file named "secrets.js" with the following content:
+
+const sbbApiKey = ' YOUR API KEY';
+module.exports = { sbbApiKey }
 
 ### Screenhots
 
