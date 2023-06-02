@@ -4,10 +4,10 @@ const app = express();
 var parseString = require('xml2js').parseString;
 const fs = require('fs');
 // const { sbbApiKey } = require('./environment/secrets');
-const sbbApiKey = process.env.api_key;
 const fileName = './public/trains.json';
 
-
+const sbbApiKey = process.env.api_key;
+const stopRef = process.env.stopRef;
 
 // ref for Zurich mainstation : 8503000 
 // ref for Geneva Airport : 8501026
@@ -22,7 +22,7 @@ const body = `
             <StopEventRequest>
                 <Location>
                     <LocationRef>
-                        <StopPointRef>8501026</StopPointRef>
+                        <StopPointRef>${stopRef}</StopPointRef>
                     </LocationRef>
                 </Location>
                 <Params>
