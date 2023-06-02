@@ -7,7 +7,10 @@ const { sbbApiKey } = require('./environment/secrets');
 
 const fileName = './public/trains.json';
 
-let txt = [];
+
+
+// ref for Zurich mainstation : 8503000 
+// ref for Geneva Airport : 8501026
 
 const body = `
 <?xml version="1.0" encoding="UTF-8"?>
@@ -19,7 +22,7 @@ const body = `
             <StopEventRequest>
                 <Location>
                     <LocationRef>
-                        <StopPointRef>8503000</StopPointRef>
+                        <StopPointRef>8501026</StopPointRef>
                     </LocationRef>
                 </Location>
                 <Params>
@@ -67,7 +70,7 @@ function getData() {
 function myFunction(xml) {
     var x, i;
     x = xml;
-
+    let txt = [];
     let timePlanned;
     let timeEstimated;
     let track;
@@ -164,7 +167,7 @@ app.get('/api/sbb/direction/:dir', (req, res) => {
     //filter the data
     let filtered = contentfull.filter(train => reqDirection.includes(train.dir))
 
-    //console.log('filtered ', filtered.length);
+    console.log('filtered ', filtered.length);
 
     //return to screen
     res.status(200).send(filtered);

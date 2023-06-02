@@ -3,3 +3,5 @@
 /public/
 /public/trains.json
 package-lock.json
+Dockerfile
+.dockerignore
