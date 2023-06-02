@@ -3,8 +3,8 @@ const express = require('express');
 const app = express();
 var parseString = require('xml2js').parseString;
 const fs = require('fs');
-const { sbbApiKey } = require('./environment/secrets');
-
+// const { sbbApiKey } = require('./environment/secrets');
+const sbbApiKey = process.env.api_key;
 const fileName = './public/trains.json';
 
 
