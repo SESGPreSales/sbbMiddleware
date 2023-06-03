@@ -17,14 +17,14 @@ The example uses the Main Trainstation in Zurich, Switzerland.
 ### API Key 
 To utilize this middleware, you must obtain an API key from https://opentransportdata.swiss/de/dev-dashboard/  
 
-Set the API key as ENV api_key = <your received api key>
+- Set the API key as ENV api_key = your received api key
 
 ### Define the station to display 
 
 In the list provided by opentransportdata, choose the station / stop the should be displayed on the screens. 
 https://opentransportdata.swiss/en/dataset/didok 
 
-Set the stop reference as ENV stopRef = <selected Stop Reference>
+- Set the stop reference as ENV stopRef = selected Stop Reference
 
 
 ### Screenhots
