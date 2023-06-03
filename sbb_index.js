@@ -9,6 +9,7 @@ const fileName = './public/trains.json';
 const sbbApiKey = process.env.api_key;
 const stopRef = process.env.stopRef;
 
+checkInputs();
 // ref for Zurich mainstation : 8503000 
 // ref for Geneva Airport : 8501026
 
@@ -174,7 +175,20 @@ app.get('/api/sbb/direction/:dir', (req, res) => {
 
 });
 
-setInterval(() => getData(), 30000);
+function checkInputs() {
+if (!sbbApiKey) { 
+    console.log('Api key is missing. Please provide key at docker run ...');
+    return 
+};
+if (!stopRef) { 
+    console.log('stopRef is missing. Please provide key at docker run ...');
+    return 
+}
 
+console.log('Congratulations: no config errors found. Starting...')
 app.listen(5019);
-console.log('listening to port 5019...');
+console.log('middleware is ready to receive requests... ');
+}
+
+
+setInterval(() => getData(), 30000);
