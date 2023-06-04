@@ -101,7 +101,7 @@ function myFunction(xml) {
     // Write the newly created JSON to file
     fs.writeFile(fileName, JSON.stringify(txt), function writeJSON(err) {
         if (err) return console.log(err);
-        console.log('writing to ' + fileName);
+        console.log('Updated ' + fileName);
     });
 };
 
@@ -125,8 +125,9 @@ app.get('/api/sbb/track/:track', (req, res) => {
     // let filtered = [];
     // reqTrack = '165'
     reqTrack = req.params.track.split(',');
+    
+    console.log(`Received request for track ${reqTrack}`)
 
-    //console.log('requested track =', reqTrack, reqTrack.length);
     //get fulldata from file:
     let contentfull = [];
     contentfull = JSON.parse(fs.readFileSync(fileName))
@@ -178,11 +179,11 @@ app.get('/api/sbb/direction/:dir', (req, res) => {
 function checkInputs() {
 if (!sbbApiKey) { 
     console.log('Api key is missing. Please provide key at docker run ...');
-    return 
+    return; 
 };
 if (!stopRef) { 
     console.log('stopRef is missing. Please provide key at docker run ...');
-    return 
+    return;
 }
 
 console.log('Congratulations: no config errors found. Starting...')
