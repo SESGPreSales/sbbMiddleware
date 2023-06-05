@@ -27,6 +27,9 @@ https://opentransportdata.swiss/en/dataset/didok
 - Set the stop reference as ENV stopRef = selected Stop Reference
 
 
+### Run using Docker
+    docker run --restart=unless-stopped --env api_key=yourAPIkey --env stopRef=selectedStop -d -p 5019:5019 tbesesg/sbbmiddleware:tagnames
+
 ### Screenhots
 ![image](https://user-images.githubusercontent.com/50730110/222460665-1f615571-d65c-45c9-8f77-66f36677eaec.png)
 ![image](https://user-images.githubusercontent.com/50730110/222460790-823dea24-5b90-4f9d-ab37-96ff43404fa7.png)
